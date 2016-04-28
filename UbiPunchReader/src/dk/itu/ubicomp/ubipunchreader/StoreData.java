@@ -5,8 +5,10 @@ package dk.itu.ubicomp.ubipunchreader;
  */
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
@@ -14,14 +16,13 @@ import java.util.Random;
 public class StoreData {
 
     private File file = null;
-    private FileWriter fileWriter = null;
     private Queue<Data> queue = null;
     private int n;
 
     public StoreData() {
 
         queue = new LinkedList();
-        n = 20;
+        n = 5;
 
         System.out.println("Creating File");
         createFile();
@@ -59,6 +60,7 @@ public class StoreData {
         }
 
         Data raw = new Data(
+                new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss").format(new Date()),
                 rand.nextInt(50) + 1,
                 rand.nextInt(50) + 1,
                 rand.nextInt(50) + 1,
@@ -72,12 +74,14 @@ public class StoreData {
             return;
         }
 
-        writeStringToFile(averageQueueData().toString());
+        Data refined = averageQueueData();
+        refined.timestamp = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss").format(new Date());
+        writeStringToFile(refined.toString());
     }
 
     private Data averageQueueData()
     {
-        Data refined = new Data(0, 0, 0, 0, 0, 0);
+        Data refined = new Data("", 0, 0, 0, 0, 0, 0);
 
         for (Data item: queue) {
             refined.AccX += item.AccX;
