@@ -1,5 +1,5 @@
 #include <SoftwareSerial.h>
-SoftwareSerial BT(10, 11); 
+SoftwareSerial BT(2, 4); 
 // creates a "virtual" serial port/UART
 // connect BT module TX to D10
 // connect BT module RX to D11
