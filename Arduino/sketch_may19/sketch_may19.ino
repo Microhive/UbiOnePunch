@@ -12,8 +12,8 @@
 #include <Wire.h>
 
 // Averaging values
-int const queue_max_size = 20;
-float queue[queue_max_size][6];
+int const queue_max_size = 5;
+int queue[queue_max_size][6];
 int queue_count = 0;
 int is_full = 0;
 int q_avg[6]; //hold q values
@@ -40,7 +40,7 @@ void loop() {
   for (int n = 0; n < 6; n++)
   {
     queue[queue_count][n] = q[n];
-    q_avg = 0;
+    q_avg[n] = 0;
   }
   
   // Average the values, summing first
@@ -89,7 +89,6 @@ void loop() {
     queue_count = 0;
   }
   
-  
-  delay(62);
+  delay(63);
 }
 
