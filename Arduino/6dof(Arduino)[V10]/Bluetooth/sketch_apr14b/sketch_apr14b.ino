@@ -1,5 +1,5 @@
 #include <SoftwareSerial.h>
-SoftwareSerial BT(10, 11); 
+SoftwareSerial BT(0, 1); 
 // creates a "virtual" serial port/UART
 // connect BT module TX to D10
 // connect BT module RX to D11
@@ -7,7 +7,7 @@ SoftwareSerial BT(10, 11);
 void setup()  
 {
   // set digital pin to control as an output
-  pinMode(13, OUTPUT);
+  pinMode(10, OUTPUT);
   // set the data rate for the SoftwareSerial port
   BT.begin(9600);
   // Send test message to other device
@@ -22,12 +22,12 @@ void loop()
     a=(BT.read());
     if (a=='1')
     {
-      digitalWrite(13, HIGH);
+      digitalWrite(10, HIGH);
       BT.println("LED on");
     }
     if (a=='2')
     {
-      digitalWrite(13, LOW);
+      digitalWrite(10, LOW);
       BT.println("LED off");
     }
     if (a=='?')

@@ -1,5 +1,5 @@
 #include <SoftwareSerial.h>
-SoftwareSerial BT(10, 11); 
+SoftwareSerial BT(0, 1); 
 SoftwareSerial GS(8, 9); 
 // creates a "virtual" serial port/UART
 // connect BT module TX to D10
@@ -26,7 +26,7 @@ void setup()
   // Send test message to other device
   BT.println("Hello from Arduino");
 
-  GS.begin(9600);
+  Serial.begin(9600);
   Wire.begin();
   
   delay(5);
