@@ -35,9 +35,11 @@ public class TCPServer extends Thread {
      * @param message the message sent by the server
      */
     public void sendMessage(String message){
+
         if (mOut != null && !mOut.checkError()) {
             mOut.println(message);
             mOut.flush();
+
         }
     }
 
@@ -52,7 +54,7 @@ public class TCPServer extends Thread {
 
             //create a server socket. A server socket waits for requests to come in over the network.
             ServerSocket serverSocket = new ServerSocket(SERVERPORT);
-
+            System.out.println("Hosted on:" + serverSocket.getInetAddress().toString());
             //create client socket... the method accept() listens for a connection to be made to this socket and accepts it.
             Socket client = serverSocket.accept();
             System.out.println("S: Receiving...");
