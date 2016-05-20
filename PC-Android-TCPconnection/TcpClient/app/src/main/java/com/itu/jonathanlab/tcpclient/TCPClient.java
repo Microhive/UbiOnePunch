@@ -15,7 +15,7 @@ import java.net.Socket;
  */
 public class TCPClient {
     private String serverMessage;
-    public static final String SERVERIP = "10.26.12.225"; //your computer IP address
+    public static  String SERVERIP = "10.26.12.225"; //your computer IP address
     public static final int SERVERPORT = 8080;
     private OnMessageReceived mMessageListener = null;
     private boolean mRun = false;
@@ -41,6 +41,9 @@ public class TCPClient {
         }
     }
 
+    public void setIpadress(String Ipadress){
+        SERVERIP = Ipadress;
+    }
     public void stopClient(){
         mRun = false;
     }
@@ -51,15 +54,17 @@ public class TCPClient {
 
         try {
             //here you must put your computer's IP address.
+
             InetAddress serverAddr = InetAddress.getByName(SERVERIP);
 
             Log.e("TCP Client", "C: Connecting...");
+
 
             //create a socket to make the connection with the server
             Socket socket = new Socket(serverAddr, SERVERPORT);
 
             try {
-
+                Log.e("TCP Client", "C: Connected" + SERVERIP);
                 //send the message to the server
                 out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 

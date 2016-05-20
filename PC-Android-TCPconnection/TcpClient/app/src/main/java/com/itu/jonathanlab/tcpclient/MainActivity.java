@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         arrayList = new ArrayList<String>();
 
         //final EditText editText = (EditText) findViewById(R.id.editText);
-        //Button send = (Button)findViewById(R.id.send_button);
+        Button send = (Button)findViewById(R.id.send_button);
         Button restart = (Button)findViewById(R.id.re_button);
 
         //relate the listView from java to the one created in xml
@@ -48,14 +48,15 @@ public class MainActivity extends AppCompatActivity {
         mList.setAdapter(mAdapter);
 
         // connect to the server
+       // mTcpClient.setIpadress("10.26.12.225");
+       new connectTask().execute("");
+        Connect();
 
-        new connectTask().execute("");
-
-/*        send.setOnClickListener(new View.OnClickListener() {
+        send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                String message = editText.getText().toString();
+                String message = "echo";
 
 
                 //add the text in the arrayList
@@ -68,9 +69,9 @@ public class MainActivity extends AppCompatActivity {
 
                 //refresh the list
                 mAdapter.notifyDataSetChanged();
-                editText.setText("");
+
             }
-        });*/
+        });
 
         restart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //add the text in the arrayList
                 arrayList.add("Restarted");
+                arrayList.add(mTcpClient.SERVERIP);
                 mTcpClient.stopClient();
                 new connectTask().execute("");
                 mTcpClient.run();
@@ -93,7 +95,22 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+public void Connect(){
+    String message = "echo";
 
+
+    //add the text in the arrayList
+    arrayList.add("c: " + message);
+
+    //sends the message to the server
+    if (mTcpClient != null) {
+        mTcpClient.sendMessage(message);
+    }
+
+    //refresh the list
+    mAdapter.notifyDataSetChanged();
+
+}
     public class connectTask extends AsyncTask<String,String,TCPClient> {
 
         @Override
@@ -101,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
 
             //we create a TCPClient object and
             mTcpClient = new TCPClient(new TCPClient.OnMessageReceived() {
+
+
                 @Override
                 //here the messageReceived method is implemented
                 public void messageReceived(String message) {
@@ -169,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+            mTcpClient.setIpadress("10.2.26.100");
             mTcpClient.run();
 
             return null;

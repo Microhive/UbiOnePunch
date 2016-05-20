@@ -1,6 +1,17 @@
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.text.DefaultCaret;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+
+import static java.lang.System.out;
 
 /**
  * Created by JonathanLab on 19-05-2016.
@@ -10,6 +21,7 @@ public class ServerBoard extends JFrame {
     private JButton sendButton;
     private JTextField message;
     private JButton startServer;
+    private JButton restartServer;
     private TCPServer mServer;
 
     private JButton gesture1;
@@ -19,24 +31,52 @@ public class ServerBoard extends JFrame {
     private JButton gesture5;
     private JButton gesture6;
     private JButton gesture7;
+    private String ipAdress;
 
     public ServerBoard() {
 
         super("ServerBoard");
 
         JPanel panelFields = new JPanel();
-        panelFields.setLayout(new BoxLayout(panelFields,BoxLayout.X_AXIS));
+        panelFields.setLayout(new BoxLayout(panelFields, BoxLayout.X_AXIS));
 
 
         JPanel panelFields2 = new JPanel();
-        panelFields2.setLayout(new BoxLayout(panelFields2,BoxLayout.X_AXIS));
+        panelFields2.setLayout(new BoxLayout(panelFields2, BoxLayout.X_AXIS));
 
         //here we will have the text messages screen
-        messagesArea = new JTextArea();
+/*        messagesArea = new JTextArea();
         messagesArea.setColumns(30);
         messagesArea.setRows(10);
         messagesArea.setEditable(false);
 
+        messagesArea = new JTextArea ( 16, 58 );
+        messagesArea.setEditable(false);
+        JScrollPane scroll = new JScrollPane(messagesArea);
+        scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+
+        */
+        final JTextArea messageArea;
+        messagesArea = new JTextArea(16, 58);
+        DefaultCaret caret = (DefaultCaret) messagesArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        JScrollPane sampleScrollPane = new JScrollPane(messagesArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+
+        // create the middle panel components
+        //messagesArea.setEditable ( false ); // set textArea non-editable
+        //JScrollPane sp = new JScrollPane(ta);
+
+
+        //frame.setVisible ( true );
+
+        // getting the ip adress of this host
+
+
+
+
+       // messagesArea.append(ipAdress);
         sendButton = new JButton("Send");
         sendButton.addActionListener(new ActionListener() {
             @Override
@@ -49,6 +89,21 @@ public class ServerBoard extends JFrame {
                 mServer.sendMessage(messageText);
                 // clear text
                 message.setText("");
+            }
+        });
+        restartServer = new JButton("restart");
+        restartServer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // get the message from the text view
+                mServer.restart();
+                // add message to the message area
+                messagesArea.append("\n" + "restarted");
+                // send the message to the client
+                mServer.sendMessage("connected from server");
+                // clear text
+
+                //listNets();
             }
         });
         gesture1 = new JButton("Gesture 1");
@@ -121,6 +176,7 @@ public class ServerBoard extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // disable the start button
                 startServer.setEnabled(false);
+                messagesArea.append("\n" + "Started server on" + ipAdress);
 
                 //creates the object OnMessageReceived asked by the TCPServer constructor
                 mServer = new TCPServer(new TCPServer.OnMessageReceived() {
@@ -133,7 +189,7 @@ public class ServerBoard extends JFrame {
                     }
                 });
                 mServer.start();
-
+                listNets();
             }
         });
 
@@ -143,9 +199,10 @@ public class ServerBoard extends JFrame {
         message.setSize(200, 20);
 
         //add the buttons and the text fields to the panel
-        panelFields.add(messagesArea);
+        panelFields.add(sampleScrollPane);
+        //panelFields.add(sampleScrollPane);
         panelFields.add(startServer);
-
+        panelFields.add(restartServer);
         panelFields.add(gesture1);
         panelFields.add(gesture2);
         panelFields.add(gesture3);
@@ -165,5 +222,31 @@ public class ServerBoard extends JFrame {
 
         setSize(300, 170);
         setVisible(true);
+    }
+    public void listNets(){
+        try {
+            Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+
+            for (NetworkInterface netint : Collections.list(nets))
+                displayInterfaceInformation(netint);
+
+
+        } catch (SocketException Se) {
+            return;
+        }
+    }
+
+
+
+    public void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
+        out.printf("Display name: %s\n", netint.getDisplayName());
+        out.printf("Name: %s\n", netint.getName());
+        Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+        for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+
+            out.printf("InetAddress: %s\n", inetAddress);
+            messagesArea.append("InetAddress: %s\n" + inetAddress.toString());
+        }
+        out.printf("\n");
     }
 }

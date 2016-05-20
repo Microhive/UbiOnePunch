@@ -42,7 +42,51 @@ public class TCPServer extends Thread {
 
         }
     }
+    public void restart(){
+        running = true;
 
+        try {
+            System.out.println("S: Connecting...");
+
+            //create a server socket. A server socket waits for requests to come in over the network.
+            ServerSocket serverSocket = new ServerSocket(SERVERPORT);
+            System.out.println("Hosted on:" + serverSocket.getInetAddress().toString());
+            //create client socket... the method accept() listens for a connection to be made to this socket and accepts it.
+            Socket client = serverSocket.accept();
+            System.out.println("S: Receiving...");
+
+            try {
+
+                //sends the message to the client
+                mOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream())), true);
+
+                //read the message received from client
+                BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+
+                //in this while we wait to receive messages from client (it's an infinite loop)
+                //this while it's like a listener for messages
+                while (running) {
+                    String message = in.readLine();
+
+                    if (message != null && messageListener != null) {
+                        //call the method messageReceived from ServerBoard class
+                        messageListener.messageReceived("Phoned connected:" + message);
+                    }
+                }
+
+            } catch (Exception e) {
+                System.out.println("S: Error");
+                e.printStackTrace();
+            } finally {
+                client.close();
+                System.out.println("S: Done.");
+            }
+
+        } catch (Exception e) {
+            System.out.println("S: Error");
+            e.printStackTrace();
+        }
+    }
     @Override
     public void run() {
         super.run();
@@ -74,7 +118,7 @@ public class TCPServer extends Thread {
 
                     if (message != null && messageListener != null) {
                         //call the method messageReceived from ServerBoard class
-                        messageListener.messageReceived(message);
+                        messageListener.messageReceived("Phoned connected:" + message);
                     }
                 }
 
