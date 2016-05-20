@@ -1,7 +1,9 @@
 package com.itu.jonathanlab.tcpclient;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,7 +28,9 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> arrayList;
     private MyCustomAdapter mAdapter;
     private TCPClient mTcpClient;
+
     String commands = "";
+    String ipAdress;
     //MainActivity activity = new MainActivity();
 
 
@@ -41,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         //final EditText editText = (EditText) findViewById(R.id.editText);
         Button send = (Button)findViewById(R.id.send_button);
         Button restart = (Button)findViewById(R.id.re_button);
+        Button connect = (Button)findViewById(R.id.connect_button);
 
         //relate the listView from java to the one created in xml
         mList = (ListView)findViewById(R.id.list);
@@ -48,9 +54,9 @@ public class MainActivity extends AppCompatActivity {
         mList.setAdapter(mAdapter);
 
         // connect to the server
-       // mTcpClient.setIpadress("10.26.12.225");
-       new connectTask().execute("");
-        Connect();
+        //mTcpClient.setIpadress("10.26.12.222");
+       /*new connectTask().execute("");
+        Connect();*/
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,6 +75,57 @@ public class MainActivity extends AppCompatActivity {
 
                 //refresh the list
                 mAdapter.notifyDataSetChanged();
+
+            }
+        });
+        connect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Connect");
+                builder.setIcon(android.R.drawable.ic_dialog_info);
+                builder.setMessage("Connect to server");
+
+                Context context = MainActivity.this;
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
+
+                final EditText InputIP = new EditText(context);
+                InputIP.setHint("Insert IP");
+                layout.addView(InputIP);
+
+                builder.setView(layout);
+
+                // Set up the buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        try {
+                            ipAdress = InputIP.getText().toString();
+                            new connectTask().execute("");
+                            Connect();
+                        } catch (Exception ex) {
+                            Toast.makeText(MainActivity.this, "Failed to connect!", Toast.LENGTH_LONG).show();
+                        }
+
+                        //ListView list = (ListView) getActivity().findViewById(R.id.list_item);
+//                        ((BaseAdapter)list.getAdapter()).notifyDataSetChanged();
+
+
+
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+
+                builder.show();
 
             }
         });
@@ -188,7 +245,9 @@ public void Connect(){
 
                 }
             });
-            mTcpClient.setIpadress("10.2.26.100");
+            //mTcpClient.setIpadress("10.2.26.100");
+            //mTcpClient.setIpadress("192.168.1.19");
+            mTcpClient.setIpadress(ipAdress);
             mTcpClient.run();
 
             return null;
