@@ -10,6 +10,8 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import weka.core.Instances;
+
 
 import static java.lang.System.out;
 
@@ -23,6 +25,7 @@ public class ServerBoard extends JFrame {
     private JButton startServer;
     private JButton restartServer;
     private TCPServer mServer;
+    private WekaTrain wekatrain;
 
     private JButton gesture1;
     private JButton gesture2;
@@ -43,6 +46,10 @@ public class ServerBoard extends JFrame {
 
         JPanel panelFields2 = new JPanel();
         panelFields2.setLayout(new BoxLayout(panelFields2, BoxLayout.X_AXIS));
+
+        wekatrain = new WekaTrain();
+        wekatrain.LoadTrainset();
+
 
         //here we will have the text messages screen
 /*        messagesArea = new JTextArea();

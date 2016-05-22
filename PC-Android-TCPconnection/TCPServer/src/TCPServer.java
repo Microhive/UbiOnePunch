@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import weka.core.Instances;
 
 /**
  * Created by JonathanLab on 19-05-2016.
@@ -136,6 +137,7 @@ public class TCPServer extends Thread {
         }
 
     }
+
 
     //Declare the interface. The method messageReceived(String message) will must be implemented in the ServerBoard
     //class at on startServer button click
