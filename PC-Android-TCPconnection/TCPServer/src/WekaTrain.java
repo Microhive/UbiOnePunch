@@ -1,12 +1,14 @@
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.trees.M5P;
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.pmml.Array;
 import weka.classifiers.trees.J48;
 import weka.core.pmml.jaxbbindings.Attribute;
+import weka.filters.unsupervised.attribute.Remove;
 
 import javax.swing.*;
 
@@ -25,7 +27,8 @@ public class WekaTrain {
             Instances train = new Instances(breader);
             train.setClassIndex(0);
 
-            breader = new BufferedReader(new FileReader("Data/test_train.arff"));
+            //breader = new BufferedReader(new FileReader("Data/test_train.arff"));
+            breader = new BufferedReader(new FileReader("Data/tt.arff"));
             Instances test = new Instances(breader);
             test.setClassIndex(0);
             breader.close();
@@ -55,6 +58,24 @@ public class WekaTrain {
             System.out.println("Built classifier:");
             System.out.println(eval.toSummaryString("\nResults\n=======\n",true));
             System.out.println(eval.fMeasure(1) + " " + eval.precision(1)+ " " + eval.recall(1) );*/
+            // filter
+            Remove rm = new Remove();
+            //rm.setAttributeIndices("1");  // remove 1st attribute
+            // classifier
+            J48 j48 = new J48();
+            j48.setUnpruned(true);        // using an unpruned J48
+            // meta-classifier
+            FilteredClassifier fc = new FilteredClassifier();
+            fc.setFilter(rm);
+            fc.setClassifier(j48);
+            // train and make predictions
+            fc.buildClassifier(train);
+            for (int i = 0; i < test.numInstances(); i++) {
+                double pred = fc.classifyInstance(test.instance(i));
+                System.out.print("ID: " + test.instance(i).value(0));
+                System.out.print(", actual: " + test.classAttribute().value((int) test.instance(i).classValue()));
+                System.out.println(", predicted: " + test.classAttribute().value((int) pred));
+            }
         }
         catch (IOException IOex){
             System.out.println("Failed to load: " + IOex.getMessage().toString());
