@@ -1,24 +1,51 @@
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.meta.FilteredClassifier;
-import weka.classifiers.trees.M5P;
-import weka.core.DenseInstance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.pmml.Array;
+import weka.core.*;
 import weka.classifiers.trees.J48;
-import weka.core.pmml.jaxbbindings.Attribute;
 import weka.filters.unsupervised.attribute.Remove;
 
-import javax.swing.*;
-
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
+import java.util.Queue;
 
 public class WekaTrain {
+
+    private File file = null;
+    private Queue<Data> queue = null;
+    private int n;
+    private Attribute[] Attributes = new Attribute[181];
+
+
+    public WekaTrain(){
+        queue = new LinkedList();
+        n = 30;
+
+        FastVector fvNominalVal = new FastVector(3);
+        fvNominalVal.addElement("up");
+        fvNominalVal.addElement("down");
+        fvNominalVal.addElement("left");
+        fvNominalVal.addElement("right");
+        Attribute Lable = new Attribute("Lable", fvNominalVal);
+
+        Attributes[0] = Lable;
+
+        for(int i = 1; i< 181;){
+            Attributes[i] = new Attribute("AccX" + (i));
+            Attributes[i+1] = new Attribute("AccY" + (i+1));
+            Attributes[i+2] = new Attribute("AccZ" + (i+2));
+            Attributes[i+3] = new Attribute("GyrX" + (i+3));
+            Attributes[i+4] = new Attribute("GyrY" + (i+4));
+            Attributes[i+5] = new Attribute("GyrZ" + (i+5));
+            i = i + 6;
+        }
+
+/*        TimerTask timerTask = new CustomTask();
+        Timer timer = new Timer(true);
+        timer.scheduleAtFixedRate(timerTask, 0, 50);
+        System.out.println("TimerTask started");*/
+    }
+
 
 
     public void LoadTrainset(){
@@ -68,7 +95,6 @@ public class WekaTrain {
         catch (Exception ex){
             System.out.println("Failed to classify:" + ex.getMessage());
         }
-
     }
 
     public int sendGesture(){
@@ -81,6 +107,21 @@ public class WekaTrain {
 
             breader = new BufferedReader(new FileReader("Data/tt.arff"));
             Instances testData = new Instances(breader);
+            testData.setClassIndex(0);
+
+            breader = new BufferedReader(new FileReader("Data/tt.arff"));
+            Instance inst = new DenseInstance(3);
+
+            // Example
+            Data data = new Data(1,1,1,1,1,1);
+
+            inst.setValue(Attributes[0], "idle");
+            for(int i = 1; i< 181; i++) {
+                inst.setValue(Attributes[i], 5.5);
+                System.out.print("Number: " + i);
+            }
+
+            testData.add(inst);
             testData.setClassIndex(0);
             breader.close();
             // filter
@@ -95,25 +136,6 @@ public class WekaTrain {
             fc.setClassifier(j48);
             // train and make predictions
             fc.buildClassifier(trainData);
-
-/*            // Create the attributes, class and text
-            FastVector fvNominalVal = new FastVector(2);
-            fvNominalVal.addElement("spam");
-            fvNominalVal.addElement("ham");
-            Attribute attribute1 = new Attribute("class", fvNominalVal);
-            Attribute attribute2 = new Attribute("text",(FastVector) null);
-// Create list of instances with one element
-            FastVector fvWekaAttributes = new FastVector(2);
-            fvWekaAttributes.addElement(attribute1);
-            fvWekaAttributes.addElement(attribute2);
-            instances = new Instances("Test relation", fvWekaAttributes, 1);
-// Set class index
-            instances.setClassIndex(0);
-// Create and add the instance
-            DenseInstance instance = new DenseInstance(2);
-            instance.setValue(attribute2, text);
-// instance.setValue((Attribute)fvWekaAttributes.elementAt(1), text);
-            instances.add(instance);*/
 
             for (int i = 0; i < testData.numInstances(); i++) {
                 double pred = fc.classifyInstance(testData.instance(i));
@@ -163,7 +185,6 @@ public class WekaTrain {
                     GestureID = 0;
                 }
             }
-
         }
         catch (IOException IOex){
             System.out.println("Failed to load: " + IOex.getMessage().toString());
@@ -171,9 +192,66 @@ public class WekaTrain {
         catch (Exception ex){
             System.out.println("Failed to classify:" + ex.getMessage());
         }
-return GestureID;
+        return GestureID;
     }
 
+    private void read() {
+
+        try(FileWriter fw = new FileWriter(file.getAbsolutePath(), true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter out = new PrintWriter(bw))
+        {
+            out.println("string");
+
+        } catch (IOException e) {
+            System.out.println("Something went wrong");
+        }
+    }
+
+    public void routine(/*Data raw*/) {
+
+        Random rand = new Random();
+
+        if (queue.size() >= n) {
+            queue.remove();
+        }
+
+        Data raw = new Data(
+                rand.nextInt(50) + 1,
+                rand.nextInt(50) + 1,
+                rand.nextInt(50) + 1,
+                rand.nextInt(50) + 1,
+                rand.nextInt(50) + 1,
+                rand.nextInt(50) + 1);
+
+        queue.add(raw);
+
+        if (queue.size() < n) {
+            return;
+        }
+
+/*        Data refined = averageQueueData();
+        writeStringToFile(refined.toString());*/
+    }
+
+    public class CustomTask extends TimerTask {
+
+        public CustomTask() {
+
+            //Constructor
+
+        }
+
+        public void run() {
+            try {
+                System.out.println("READING FILE! ");
+
+            } catch (Exception ex) {
+
+                System.out.println("error running thread " + ex.getMessage());
+            }
+        }
+    }
 /*    BufferedInputStream reader = null;
     boolean running = true;
 
@@ -207,6 +285,4 @@ public boolean isReadingfile(){
             }
         }
     }*/
-
-
 }
