@@ -21,6 +21,7 @@ import static java.lang.System.out;
 public class ServerBoard extends JFrame {
     private JTextArea messagesArea;
     private JButton sendButton;
+    private JButton predict;
     private JTextField message;
     private JButton startServer;
     private JButton restartServer;
@@ -51,6 +52,7 @@ public class ServerBoard extends JFrame {
         wekatrain.LoadTrainset();
         readfile FR = new readfile();
         FR.readfile();
+        wekatrain.sendGesture();
 
 
         //here we will have the text messages screen
@@ -83,7 +85,15 @@ public class ServerBoard extends JFrame {
         // getting the ip adress of this host
 
 
-
+        predict = new JButton("Predict");
+        predict.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              int gesture =  wekatrain.sendGesture();
+                messagesArea.append("\n" + "gesture id: (" + gesture +")");
+                mServer.sendMessage(""+gesture);
+            }
+        });
 
        // messagesArea.append(ipAdress);
         sendButton = new JButton("Send");
@@ -223,6 +233,7 @@ public class ServerBoard extends JFrame {
 
         panelFields2.add(message);
         panelFields2.add(sendButton);
+        panelFields2.add(predict);
 
         getContentPane().add(panelFields);
         getContentPane().add(panelFields2);
