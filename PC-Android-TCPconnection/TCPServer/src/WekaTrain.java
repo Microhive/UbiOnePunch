@@ -1,13 +1,16 @@
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.trees.M5P;
+import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.pmml.Array;
 import weka.classifiers.trees.J48;
+import weka.core.pmml.jaxbbindings.Attribute;
+
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -16,39 +19,42 @@ public class WekaTrain {
 
     public void LoadTrainset(){
         try{
-            ArrayList<Double> alist = new ArrayList<>();
-            BufferedReader reader = new BufferedReader(
-                    new FileReader("Data/down_train.arff"));
-            Instances data = new Instances(reader);
+            //ArrayList<Double> alist = new ArrayList<>();
+            BufferedReader breader = null;
+            breader = new BufferedReader(new FileReader("Data/combined_train.arff"));
+            Instances train = new Instances(breader);
+            train.setClassIndex(0);
 
-            String val = data.attribute("GyrZ30").toString();
-            int val2 = data.numAttributes();
-         //   String val1 = data.equalHeadersMsg(data).toString();
-            for(int i=0; i<data.attributeToDoubleArray(0).length; i++ ){
-                System.out.println("valI:" + i);
-            }
+            breader = new BufferedReader(new FileReader("Data/test_train.arff"));
+            Instances test = new Instances(breader);
+            test.setClassIndex(0);
+            breader.close();
 
-            //alist = data.attributeToDoubleArray(0);
-            data.setClassIndex(0);
+            // train classifier
+            Classifier cls = new J48();
+            cls.buildClassifier(train);
+            // evaluate classifier and print some statistics
+            Evaluation eval = new Evaluation(train);
+            eval.evaluateModel(cls, test);
+            System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+            // Declare the class attribute along with its values
 
-            reader.close();
-            // setting class attribute
-
+/*            FastVector fvClassVal = new FastVector(2);
+            fvClassVal.addElement("up");
+            fvClassVal.addElement("down");
+            Attribute ClassAttr = new Attribute("Lable",fvClassVal);
+            Attribute ClassAttribute = new Attribute("Lable", fvClassVal);*/
             System.out.println("Filed loaded");
-            System.out.println("val:" + val2);
-            // building a classifier
+            //System.out.println("val:" + val2);
 
-           // J48 jtree = new J48();
-            //jtree.buildClassifier(data);
-            NaiveBayes jtree = new NaiveBayes();
-            jtree.buildClassifier(data);
 
-            Evaluation eval = new Evaluation(data);
+
+/*            Evaluation eval = new Evaluation(data);
             eval.crossValidateModel(jtree, data, 5, new Random(1));
 
             System.out.println("Built classifier:");
             System.out.println(eval.toSummaryString("\nResults\n=======\n",true));
-            System.out.println(eval.fMeasure(1) + " " + eval.precision(1)+ " " + eval.recall(1) );
+            System.out.println(eval.fMeasure(1) + " " + eval.precision(1)+ " " + eval.recall(1) );*/
         }
         catch (IOException IOex){
             System.out.println("Failed to load: " + IOex.getMessage().toString());
@@ -58,6 +64,40 @@ public class WekaTrain {
         }
 
     }
+
+/*    BufferedInputStream reader = null;
+    boolean running = true;
+
+public boolean isReadingfile(){
+    running = true;
+    try {
+        reader = new BufferedInputStream(new FileInputStream( "out.txt" ) );
+        running = true;
+    }
+    catch (FileNotFoundException Fex){
+        System.out.print("file not found: " + Fex.getMessage().toString());
+        running = false;
+    }
+    return running;
+}
+    public void run() {
+        while( running ) {
+            try {
+                if (reader.available() > 0) {
+                    System.out.print((char) reader.read());
+                } else {
+                    try {
+                        //sleep(500);
+                    } catch (InterruptedException ex) {
+                        running = false;
+                    }
+                }
+            }
+            catch (IOException Ioex){
+
+            }
+        }
+    }*/
 
 
 }

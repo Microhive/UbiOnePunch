@@ -49,6 +49,8 @@ public class ServerBoard extends JFrame {
 
         wekatrain = new WekaTrain();
         wekatrain.LoadTrainset();
+        readfile FR = new readfile();
+        FR.readfile();
 
 
         //here we will have the text messages screen
