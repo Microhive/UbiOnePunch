@@ -3,7 +3,9 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.trees.M5P;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.pmml.Array;
 import weka.classifiers.trees.J48;
@@ -93,11 +95,33 @@ public class WekaTrain {
             fc.setClassifier(j48);
             // train and make predictions
             fc.buildClassifier(trainData);
+
+/*            // Create the attributes, class and text
+            FastVector fvNominalVal = new FastVector(2);
+            fvNominalVal.addElement("spam");
+            fvNominalVal.addElement("ham");
+            Attribute attribute1 = new Attribute("class", fvNominalVal);
+            Attribute attribute2 = new Attribute("text",(FastVector) null);
+// Create list of instances with one element
+            FastVector fvWekaAttributes = new FastVector(2);
+            fvWekaAttributes.addElement(attribute1);
+            fvWekaAttributes.addElement(attribute2);
+            instances = new Instances("Test relation", fvWekaAttributes, 1);
+// Set class index
+            instances.setClassIndex(0);
+// Create and add the instance
+            DenseInstance instance = new DenseInstance(2);
+            instance.setValue(attribute2, text);
+// instance.setValue((Attribute)fvWekaAttributes.elementAt(1), text);
+            instances.add(instance);*/
+
             for (int i = 0; i < testData.numInstances(); i++) {
                 double pred = fc.classifyInstance(testData.instance(i));
                 System.out.print("ID: " + testData.instance(i).value(0));
                 System.out.print(", actual: " + testData.classAttribute().value((int) testData.instance(i).classValue()));
                 System.out.println(", predicted: " + testData.classAttribute().value((int) pred));
+
+                //System.out.println(", data vals: " + testData.classAttribute().value());
                 String up = "up";
                 String down = "down";
                 String left = "left";
