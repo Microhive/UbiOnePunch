@@ -1,15 +1,22 @@
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.core.*;
 import weka.classifiers.trees.J48;
+import weka.core.converters.ArffLoader;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.CSVLoader;
+import weka.core.converters.ConverterUtils;
 import weka.filters.unsupervised.attribute.Remove;
 
 import java.io.*;
 import java.util.*;
 import java.util.Queue;
 
+
 public class WekaTrain {
+
 
     private File file = null;
     private Queue<Data> queue = null;
@@ -18,32 +25,38 @@ public class WekaTrain {
 
 
     public WekaTrain(){
-        queue = new LinkedList();
-        n = 30;
+try{
+// Create empty instance with three attribute values
+    createInstance();
 
-        FastVector fvNominalVal = new FastVector(3);
-        fvNominalVal.addElement("up");
-        fvNominalVal.addElement("down");
-        fvNominalVal.addElement("left");
-        fvNominalVal.addElement("right");
-        Attribute Lable = new Attribute("Lable", fvNominalVal);
+    // load data
+    ArffLoader loader = new ArffLoader();
+    loader.setFile(new File("Data/tt.arff"));
+    Instances structure = loader.getStructure();
+    structure.setClassIndex(0);
 
-        Attributes[0] = Lable;
+    // train NaiveBayes
+    NaiveBayesUpdateable nb = new NaiveBayesUpdateable();
+    nb.buildClassifier(structure);
+    Instance current;
+    while ((current = loader.getNextInstance(structure)) != null)
+        nb.updateClassifier(current);
 
-        for(int i = 1; i< 181;){
-            Attributes[i] = new Attribute("AccX" + (i));
-            Attributes[i+1] = new Attribute("AccY" + (i+1));
-            Attributes[i+2] = new Attribute("AccZ" + (i+2));
-            Attributes[i+3] = new Attribute("GyrX" + (i+3));
-            Attributes[i+4] = new Attribute("GyrY" + (i+4));
-            Attributes[i+5] = new Attribute("GyrZ" + (i+5));
-            i = i + 6;
-        }
+    // output generated model
+    System.out.println(nb);
+}catch (IOException ex){
+    System.out.println("failed to load arff" + ex.getMessage());
+}
+catch (Exception ex){
+    System.out.println("failed to something" + ex.getMessage());
+}
 
-/*        TimerTask timerTask = new CustomTask();
+
+
+        TimerTask timerTask = new CustomTask();
         Timer timer = new Timer(true);
-        timer.scheduleAtFixedRate(timerTask, 0, 50);
-        System.out.println("TimerTask started");*/
+        timer.scheduleAtFixedRate(timerTask, 0, 3000);
+        System.out.println("TimerTask started");
     }
 
 
@@ -105,15 +118,19 @@ public class WekaTrain {
             Instances trainData = new Instances(breader);
             trainData.setClassIndex(0);
 
-            breader = new BufferedReader(new FileReader("Data/tt.arff"));
+            breader = new BufferedReader(new FileReader("Data/input.csv"));
             Instances testData = new Instances(breader);
             testData.setClassIndex(0);
 
+/*            ConverterUtils.DataSource source = new ConverterUtils.DataSource("Data/input.csv");
+            Instances testData = source.getDataSet();
+            testData.setClassIndex(0);*/
+
             breader = new BufferedReader(new FileReader("Data/tt.arff"));
-            Instance inst = new DenseInstance(3);
+            //Instance inst = new DenseInstance(3);
 
             // Example
-            Data data = new Data(1,1,1,1,1,1);
+/*            Data data = new Data(1,1,1,1,1,1);
 
             inst.setValue(Attributes[0], "idle");
             for(int i = 1; i< 181; i++) {
@@ -122,7 +139,7 @@ public class WekaTrain {
             }
 
             testData.add(inst);
-            testData.setClassIndex(0);
+            testData.setClassIndex(0);*/
             breader.close();
             // filter
             Remove rm = new Remove();
@@ -245,10 +262,11 @@ public class WekaTrain {
         public void run() {
             try {
                 System.out.println("READING FILE! ");
+                readCSV();
 
             } catch (Exception ex) {
 
-                System.out.println("error running thread " + ex.getMessage());
+                System.out.println("error running thread " + ex.getLocalizedMessage());
             }
         }
     }
@@ -285,4 +303,112 @@ public boolean isReadingfile(){
             }
         }
     }*/
+
+    public void readCSV(){
+        String csvFile =  "Data/input.csv";
+        BufferedReader br = null;
+        String line = "";
+        String cvsSplitBy = ",";
+        ArrayList<String> GestureQ;
+
+        try {
+            GestureQ = new ArrayList<>();
+            br = new BufferedReader(new FileReader(csvFile));
+            while ((line = br.readLine()) != null) {
+
+                // use comma as separator
+                String[] dataFromFile = line.split(cvsSplitBy);
+
+                for(int i = 0; i<=30;i++){
+                    GestureQ.add(dataFromFile[i]);
+                   // System.out.println("Data code: for"+i+" :" + GestureQ.get(i));
+                }
+
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        System.out.println("Done");
+    }
+    public void csvtoarff(){
+String CSVSource = "Data/input.csv";
+        String arffSource = "Data/inputC";
+        try{
+        // load CSV
+        CSVLoader loader = new CSVLoader();
+        loader.setSource(new File(CSVSource));
+        Instances data = loader.getDataSet();
+
+        // save ARFF
+        ArffSaver saver = new ArffSaver();
+        saver.setInstances(data);
+        saver.setFile(new File(arffSource));
+        saver.setDestination(new File(arffSource));
+        saver.writeBatch();
+        }
+        catch (IOException Ioex) {
+            System.out.print("Error in converting..." + Ioex.getMessage());
+        }
+    }
+
+    public void createInstance(){
+
+        try{
+        BufferedReader breader = null;
+        breader = new BufferedReader(new FileReader("Data/tt.arff"));
+        Instances trainData = new Instances(breader);
+        trainData.setClassIndex(0);
+
+        queue = new LinkedList();
+        n = 30;
+
+        FastVector fvNominalVal = new FastVector(3);
+        fvNominalVal.addElement("up");
+        fvNominalVal.addElement("down");
+        fvNominalVal.addElement("left");
+        fvNominalVal.addElement("right");
+        Attribute Lable = new Attribute("Lable", fvNominalVal);
+
+        Attributes[0] = Lable;
+
+        for(int i = 1; i< 181;){
+            Attributes[i] = new Attribute("AccX" + (i));
+            Attributes[i+1] = new Attribute("AccY" + (i+1));
+            Attributes[i+2] = new Attribute("AccZ" + (i+2));
+            Attributes[i+3] = new Attribute("GyrX" + (i+3));
+            Attributes[i+4] = new Attribute("GyrY" + (i+4));
+            Attributes[i+5] = new Attribute("GyrZ" + (i+5));
+            i = i + 6;
+            System.out.print("i is: " + i);
+            Instance inst = new DenseInstance(3);
+
+// Set instance's values for the attributes "length", "weight", and "position"
+            inst.setValue(Attributes[i], 5.3);
+            inst.setValue(Attributes[i+1], 300);
+            inst.setValue(Attributes[i+2], 454);
+
+// Set instance's dataset to be the dataset "race"
+            inst.setDataset(trainData);
+
+// Print the instance
+            System.out.println("The instance: " + inst);
+        }
+
+        }
+        catch (IOException ioex){
+            System.out.print("ioex:" + ioex.getMessage());
+        }
+    }
 }
