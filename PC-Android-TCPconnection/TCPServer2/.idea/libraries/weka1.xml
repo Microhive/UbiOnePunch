@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="weka1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../stable-3-8/weka/weka.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/weka/weka.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
