@@ -1,10 +1,6 @@
-import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.core.*;
 import weka.classifiers.trees.J48;
-import weka.core.converters.ArffLoader;
-import weka.core.converters.ArffSaver;
-import weka.core.converters.CSVLoader;
 import weka.filters.unsupervised.attribute.Remove;
 import java.util.Timer;
 
@@ -29,12 +25,11 @@ public class WekaTrain {
     private int n;
     private Attribute[] attributeList = new Attribute[181];
     private TCPServer LhServer;
-    private boolean isReady;
+    private boolean processingGesture = false;
 
     public WekaTrain() {
         startServer();
         listNets();
-
 
         queue = new ArrayList();
         n = 30;
@@ -54,9 +49,11 @@ public class WekaTrain {
 
     public int sendGesture(){
         int GestureID = 0;
-        if(!isReady){
+
+        if(processingGesture){
             return GestureID;
         }
+
         try {
             BufferedReader breader = null;
             breader = new BufferedReader(new FileReader("Data/combined_train.arff"));
@@ -98,42 +95,42 @@ public class WekaTrain {
                 if(testData.classAttribute().value((int)pred).equals(left)){
                     System.out.print("Predicted: " + left);
                     GestureID = 1;
-                    isReady = true;
+                    processingGesture = true;
                 }
                 else if(testData.classAttribute().value((int)pred).equals(right)){
                     System.out.print("Predicted: " + right);
                     GestureID = 2;
-                    isReady = true;
+                    processingGesture = true;
                 }
                 else if(testData.classAttribute().value((int)pred).equals(up)){
                     System.out.print("Predicted: " + up);
                     GestureID = 3;
-                    isReady = true;
+                    processingGesture = true;
                 }
                 else if(testData.classAttribute().value((int)pred).equals(down)){
                     System.out.print("Predicted: " + down);
                     GestureID = 4;
-                    isReady = true;
+                    processingGesture = true;
                 }
                 else if(testData.classAttribute().value((int)pred).equals(tiltr)){
                     System.out.print("Predicted: " + tiltr);
                     GestureID = 5;
-                    isReady = true;
+                    processingGesture = true;
                 }
                 else if(testData.classAttribute().value((int)pred).equals(tiltl)){
                     System.out.print("Predicted: " + tiltl);
                     GestureID = 6;
-                    isReady = true;
+                    processingGesture = true;
                 }
                 else if(testData.classAttribute().value((int)pred).equals(idle)){
                     System.out.print("Predicted: " + idle);
                     GestureID = 7;
-                    isReady = false;
+//                    processingGesture = false;
                 }
                 else{
                     System.out.print("failed to predict or not found");
                     GestureID = 0;
-                    isReady = false;
+//                    processingGesture = false;
                 }
             }
         }
@@ -147,19 +144,17 @@ public class WekaTrain {
         System.out.print("\n" + "input to android: (" + messageText +")");
         //messagesArea.append("\n" + "input to android: (" + messageText +")");
 
-
-
-        if(GestureID !=0 && isReady == true){
+        if(GestureID != 0 && GestureID != 7){
 
             Timer timer1 = new Timer();
             timer1.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    isReady = false;
+                    processingGesture = false;
                     System.out.print("started timer");
                     LhServer.sendMessage(messageText);
                 }
-            }, 5000);
+            }, 2000);
         }
 
         return GestureID;
