@@ -58,7 +58,7 @@ public class WekaTrain {
         try {
             TimerTask timerTask = new CustomTask();
             Timer timer = new Timer(true);
-            timer.scheduleAtFixedRate(timerTask, 0, 3000);
+            timer.scheduleAtFixedRate(timerTask, 0, 250);
             System.out.println("TimerTask started");
         }
         catch (Exception e) {
@@ -306,7 +306,7 @@ public class WekaTrain {
         public CustomTask() throws IOException {
         }
 
-        boolean running = true;
+//        boolean running = true;
         boolean reachedEndOnce = false;
 //        BufferedInputStream reader = new BufferedInputStream(new FileInputStream( "Data/log.csv" ) );
 //        BufferedReader br = new BufferedReader(new FileReader("Data/log.csv"));
@@ -321,39 +321,41 @@ public class WekaTrain {
 
         public void run() {
 
-            while( running ) {
-                try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
-                    InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
-                    BufferedReader lineReader = new BufferedReader(reader);
+            try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
+                InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+                BufferedReader lineReader = new BufferedReader(reader);
 
-                    while ((line = lineReader.readLine()) != null) {
+                while ((line = lineReader.readLine()) != null) {
 
-                        if (reachedEndOnce && lineCount > lastCount)
-                        {
-                            String[] dataFromFile = line.split(cvsSplitBy);
-                            Data d = new Data(
-                                    Double.parseDouble(dataFromFile[1]),
-                                    Double.parseDouble(dataFromFile[2]),
-                                    Double.parseDouble(dataFromFile[3]),
-                                    Double.parseDouble(dataFromFile[4]),
-                                    Double.parseDouble(dataFromFile[5]),
-                                    Double.parseDouble(dataFromFile[6]));
+                    if (reachedEndOnce && lineCount > lastCount)
+                    {
+                        String[] dataFromFile = line.split(cvsSplitBy);
+                        Data d = new Data(
+                                Double.parseDouble(dataFromFile[1]),
+                                Double.parseDouble(dataFromFile[2]),
+                                Double.parseDouble(dataFromFile[3]),
+                                Double.parseDouble(dataFromFile[4]),
+                                Double.parseDouble(dataFromFile[5]),
+                                Double.parseDouble(dataFromFile[6]));
 
-                            PushQueue(d);
-                            System.out.println( line );
-                        }
+                        PushQueue(d);
 
-                        lineCount++;
                     }
-
-                    lastCount = lineCount;
-                    lineCount = 0;
-
-                    reachedEndOnce = true;
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    lineCount++;
                 }
+
+                lastCount = lineCount;
+                lineCount = 0;
+
+                reachedEndOnce = true;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (queue.size() == 30)
+            {
+                System.out.println( queue.get(queue.size()-1) );
             }
         }
     }
