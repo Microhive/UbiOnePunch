@@ -10,5 +10,6 @@
     <orderEntry type="library" exported="" name="doc" level="project" />
     <orderEntry type="library" name="weka" level="project" />
     <orderEntry type="library" name="weka1" level="project" />
+    <orderEntry type="library" name="weka2" level="project" />
   </component>
 </module>

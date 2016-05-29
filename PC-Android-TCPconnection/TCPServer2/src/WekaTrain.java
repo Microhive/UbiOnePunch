@@ -8,12 +8,17 @@ import weka.core.converters.CSVLoader;
 import weka.filters.unsupervised.attribute.Remove;
 
 import java.io.*;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+
+import static java.lang.System.out;
 
 
 public class WekaTrain {
@@ -22,8 +27,11 @@ public class WekaTrain {
     private List<Data> queue = null;
     private int n;
     private Attribute[] attributeList = new Attribute[181];
+    private TCPServer LhServer;
 
     public WekaTrain() {
+        startServer();
+        listNets();
 
         queue = new ArrayList();
         n = 30;
@@ -121,6 +129,10 @@ public class WekaTrain {
         catch (Exception ex){
             System.out.println("Failed to classify:" + ex.getMessage());
         }
+        String messageText = ""+ GestureID;
+        System.out.print("\n" + "input to android: (" + messageText +")");
+        //messagesArea.append("\n" + "input to android: (" + messageText +")");
+        LhServer.sendMessage(messageText);
         return GestureID;
     }
     // List <Point3d> points
@@ -298,5 +310,46 @@ public class WekaTrain {
             i += 6;
             index++;
         }
+    }
+    public void startServer(){
+        LhServer = new TCPServer(new TCPServer.OnMessageReceived() {
+            @Override
+            //this method declared in the interface from TCPServer class is implemented here
+            //this method is actually a callback method, because it will run every time when it will be called from
+            //TCPServer class (at while)
+            public void messageReceived(String message) {
+                System.out.print("\n "+message);
+                //messagesArea.append("\n "+message);
+            }
+        });
+        LhServer.start();
+
+    }
+    public void listNets(){
+        try {
+            Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+
+            for (NetworkInterface netint : Collections.list(nets))
+                displayInterfaceInformation(netint);
+
+
+        } catch (SocketException Se) {
+            return;
+        }
+    }
+
+
+
+    public void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
+        out.printf("Display name: %s\n", netint.getDisplayName());
+        out.printf("Name: %s\n", netint.getName());
+        Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+        for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+
+            out.printf("InetAddress: %s\n", inetAddress);
+            System.out.print("InetAddress: %s\n" + inetAddress.toString());
+            //messagesArea.append("InetAddress: %s\n" + inetAddress.toString());
+        }
+        out.printf("\n");
     }
 }
