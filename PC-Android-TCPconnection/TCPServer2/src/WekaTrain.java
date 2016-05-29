@@ -1,5 +1,3 @@
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.core.*;
@@ -26,35 +24,12 @@ public class WekaTrain {
     private Attribute[] attributeList = new Attribute[181];
 
     public WekaTrain() {
-        try {
-            // Create empty instance with three attribute values
-            createInstance();
 
-            queue = new ArrayList();
-            n = 30;
+        queue = new ArrayList();
+        n = 30;
 
-            // load data
-            ArffLoader loader = new ArffLoader();
-            loader.setFile(new File("Data/tt.arff"));
-            Instances structure = loader.getStructure();
-            structure.setClassIndex(0);
+        createInstance();
 
-            // train NaiveBayes
-            NaiveBayesUpdateable nb = new NaiveBayesUpdateable();
-//            nb.buildClassifier(structure);
-//            Instance current;
-//            while ((current = loader.getNextInstance(structure)) != null)
-//                nb.updateClassifier(current);
-//
-//             output generated model
-//            System.out.println(nb);
-        }
-        catch (IOException ex) {
-            System.out.println("failed to load arff" + ex.getMessage());
-        }
-        catch (Exception ex) {
-            System.out.println("failed to something" + ex.getMessage());
-        }
         try {
             TimerTask timerTask = new CustomTask();
             Timer timer = new Timer(true);
@@ -66,57 +41,6 @@ public class WekaTrain {
         }
     }
 
-
-
-    public void LoadTrainset(){
-        try{
-            //ArrayList<Double> alist = new ArrayList<>();
-            BufferedReader breader = null;
-            breader = new BufferedReader(new FileReader("Data/combined_train.arff"));
-            Instances train = new Instances(breader);
-            train.setClassIndex(0);
-
-            //breader = new BufferedReader(new FileReader("Data/test_train.arff"));
-            breader = new BufferedReader(new FileReader("Data/tt.arff"));
-            Instances test = new Instances(breader);
-            test.setClassIndex(0);
-            breader.close();
-
-            // train classifier
-            Classifier cls = new J48();
-            cls.buildClassifier(train);
-            // evaluate classifier and print some statistics
-            Evaluation eval = new Evaluation(train);
-            eval.evaluateModel(cls, test);
-            System.out.println(eval.toSummaryString("\nResults\n======\n", false));
-            // Declare the class attribute along with its values
-
-/*            FastVector fvClassVal = new FastVector(2);
-            fvClassVal.addElement("up");
-            fvClassVal.addElement("down");
-            Attribute ClassAttr = new Attribute("Lable",fvClassVal);
-            Attribute ClassAttribute = new Attribute("Lable", fvClassVal);*/
-            System.out.println("File loaded");
-            //System.out.println("val:" + val2);
-
-
-
-/*            Evaluation eval = new Evaluation(data);
-            eval.crossValidateModel(jtree, data, 5, new Random(1));
-
-            System.out.println("Built classifier:");
-            System.out.println(eval.toSummaryString("\nResults\n=======\n",true));
-            System.out.println(eval.fMeasure(1) + " " + eval.precision(1)+ " " + eval.recall(1) );*/
-
-        }
-        catch (IOException IOex){
-            System.out.println("Failed to load: " + IOex.getMessage().toString());
-        }
-        catch (Exception ex){
-            System.out.println("Failed to classify:" + ex.getMessage());
-        }
-    }
-
     public int sendGesture(){
         int GestureID = 0;
         try {
@@ -124,30 +48,11 @@ public class WekaTrain {
             breader = new BufferedReader(new FileReader("Data/combined_train.arff"));
             Instances trainData = new Instances(breader);
             trainData.setClassIndex(0);
+            breader.close();
 
-            breader = new BufferedReader(new FileReader("Data/input.csv"));
-            Instances testData = insertIntoWeka(queue, "he");
+            Instances testData = insertIntoWeka(queue, "TestSet");
             testData.setClassIndex(0);
 
-//            ConverterUtils.DataSource source = new ConverterUtils.DataSource("Data/input.csv");
-//            Instances trainData = insertIntoWeka(queue, "he");
-//            trainData.setClassIndex(0);
-
-//            breader = new BufferedReader(new FileReader("Data/tt.arff"));
-            //Instance inst = new DenseInstance(3);
-
-            // Example
-/*            Data data = new Data(1,1,1,1,1,1);
-
-            inst.setValue(attributeList[0], "idle");
-            for(int i = 1; i< 181; i++) {
-                inst.setValue(attributeList[i], 5.5);
-                System.out.print("Number: " + i);
-            }
-
-            testData.add(inst);
-            testData.setClassIndex(0);*/
-            breader.close();
             // filter
             Remove rm = new Remove();
             //rm.setAttributeIndices("1");  // remove 1st attribute
@@ -231,33 +136,32 @@ public class WekaTrain {
         // Create the empty datasets "wekaPoints" with above attributes
         Instances wekaPoints = new Instances(name, attributes, 0);
 
-        int counter = 0;
+
+        // Create empty instance
+        Instance inst = new weka.core.DenseInstance(181);
+        inst.setValue(attributeList[0], "idle");
+
+        int counter = 1;
         for (Iterator<Data> i = queue.iterator(); i.hasNext();)
         {
-            // Create empty instance with three attribute values
-            Instance inst = new weka.core.DenseInstance(5);
             // get the point3d
             Data p = i.next();
 
-            if (counter == 0)
-            {
-                inst.setValue(attributeList[0], "idle");
-            }
             // Set instance's values for the attributes "x", "y", and "z"
-            inst.setValue(attributeList[counter+1], p.AccX);
-            inst.setValue(attributeList[counter+2], p.AccY);
-            inst.setValue(attributeList[counter+3], p.AccZ);
-            inst.setValue(attributeList[counter+4], p.GyrX);
-            inst.setValue(attributeList[counter+5], p.GyrY);
-            inst.setValue(attributeList[counter+6], p.GyrZ);
+            inst.setValue(attributeList[counter++], p.AccX);
+            inst.setValue(attributeList[counter++], p.AccY);
+            inst.setValue(attributeList[counter++], p.AccZ);
+            inst.setValue(attributeList[counter++], p.GyrX);
+            inst.setValue(attributeList[counter++], p.GyrY);
+            inst.setValue(attributeList[counter++], p.GyrZ);
 
-            // Set instance's dataset to be the dataset "wekaPoints"
-            inst.setDataset(wekaPoints);
-
-            // Add the Instance to Instances
-            wekaPoints.add(inst);
-            counter += 6;
         }
+
+        // Set instance's dataset to be the dataset "wekaPoints"
+        inst.setDataset(wekaPoints);
+
+        // Add the Instance to Instances
+        wekaPoints.add(inst);
 
         return wekaPoints;
     }
@@ -339,7 +243,6 @@ public class WekaTrain {
                                 Double.parseDouble(dataFromFile[6]));
 
                         PushQueue(d);
-
                     }
                     lineCount++;
                 }
@@ -353,8 +256,9 @@ public class WekaTrain {
                 e.printStackTrace();
             }
 
-            if (queue.size() == 30)
+            if (queue.size() == 30 && reachedEndOnce)
             {
+                sendGesture();
                 System.out.println( queue.get(queue.size()-1) );
             }
         }
@@ -368,66 +272,6 @@ public class WekaTrain {
             queue.remove(0);
     }
 
-//    public void readCSV(){
-//        String csvFile =  "Data/input.csv";
-//        BufferedReader br = null;
-//        String line = "";
-//        String cvsSplitBy = ",";
-//        ArrayList<String> GestureQ;
-//
-//        try {
-//            GestureQ = new ArrayList<>();
-//            br = new BufferedReader(new FileReader(csvFile));
-//            while ((line = br.readLine()) != null) {
-//
-//                // use comma as separator
-//                String[] dataFromFile = line.split(cvsSplitBy);
-//
-//                for(int i = 0; i<=30;i++){
-//                    GestureQ.add(dataFromFile[i]);
-//                   // System.out.println("Data code: for"+i+" :" + GestureQ.get(i));
-//                }
-//
-//            }
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (br != null) {
-//                try {
-//                    br.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//
-//        System.out.println("Done");
-//    }
-
-    public void csvtoarff(){
-String CSVSource = "Data/input.csv";
-        String arffSource = "Data/inputC";
-        try{
-        // load CSV
-        CSVLoader loader = new CSVLoader();
-        loader.setSource(new File(CSVSource));
-        Instances data = loader.getDataSet();
-
-        // save ARFF
-        ArffSaver saver = new ArffSaver();
-        saver.setInstances(data);
-        saver.setFile(new File(arffSource));
-        saver.setDestination(new File(arffSource));
-        saver.writeBatch();
-        }
-        catch (IOException Ioex) {
-            System.out.print("Error in converting..." + Ioex.getMessage());
-        }
-    }
-
     public void createInstance(){
 
         FastVector fvNominalVal = new FastVector(3);
@@ -435,8 +279,8 @@ String CSVSource = "Data/input.csv";
         fvNominalVal.addElement("down");
         fvNominalVal.addElement("left");
         fvNominalVal.addElement("right");
-        fvNominalVal.addElement("till");
-        fvNominalVal.addElement("tilr");
+        fvNominalVal.addElement("tiltl");
+        fvNominalVal.addElement("tiltr");
         fvNominalVal.addElement("idle");
         Attribute Lable = new Attribute("Lable", fvNominalVal);
 
