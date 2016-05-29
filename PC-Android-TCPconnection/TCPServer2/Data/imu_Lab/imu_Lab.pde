@@ -131,9 +131,9 @@ void processSerialData() {
         int xAccel = int(inputStringArr[1]);
         int yAccel = int(inputStringArr[2]);
         int zAccel = int(inputStringArr[3]);
-        int vRef = int(inputStringArr[4]);
-        int xRate = int(inputStringArr[5]);
-        int yRate = int(inputStringArr[6]);
+        int vRef = int(inputStringArr[4]) * 2;
+        int xRate = int(inputStringArr[5]) * 2;
+        int yRate = int(inputStringArr[6]) * 2;
 
         g_xAccel.addVal(xAccel);
         g_yAccel.addVal(yAccel);
@@ -306,6 +306,6 @@ String port() {
 }
 
 void mousePressed() {
-  file.close();
-  exit();
+  //file.close();
+  //exit();
 }

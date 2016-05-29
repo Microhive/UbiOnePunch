@@ -1,4 +1,5 @@
 import weka.classifiers.meta.FilteredClassifier;
+import weka.classifiers.trees.HoeffdingTree;
 import weka.core.*;
 import weka.classifiers.trees.J48;
 import weka.filters.unsupervised.attribute.Remove;
@@ -37,9 +38,9 @@ public class WekaTrain {
         createInstance();
 
         try {
-            TimerTask timerTask = new CustomTask();
+            TimerTask timerTask = new readFileTask();
             Timer timer = new Timer(true);
-            timer.scheduleAtFixedRate(timerTask, 0, 150);
+            timer.scheduleAtFixedRate(timerTask, 0, 100);
             System.out.println("TimerTask started");
         }
         catch (Exception e) {
@@ -68,9 +69,11 @@ public class WekaTrain {
             Remove rm = new Remove();
             //rm.setAttributeIndices("1");  // remove 1st attribute
             // classifier
+//            HoeffdingTree ht = new HoeffdingTree();
+
             J48 j48 = new J48();
             j48.setUnpruned(true);        // using an unpruned J48
-            // meta-classifier
+//             meta-classifier
             FilteredClassifier fc = new FilteredClassifier();
             fc.setFilter(rm);
             fc.setClassifier(j48);
@@ -80,16 +83,16 @@ public class WekaTrain {
             for (int i = 0; i < testData.numInstances(); i++) {
                 double pred = fc.classifyInstance(testData.instance(i));
                 System.out.print("ID: " + testData.instance(i).value(0));
-                System.out.print(", actual: " + testData.classAttribute().value((int) testData.instance(i).classValue()));
+//                System.out.print(", actual: " + testData.classAttribute().value((int) testData.instance(i).classValue()));
                 System.out.println(", predicted: " + testData.classAttribute().value((int) pred));
 
-                //System.out.println(", data vals: " + testData.classAttribute().value());
-                String up = "up";
-                String down = "down";
+//                System.out.println(", data vals: " + testData.classAttribute().value());
                 String left = "left";
                 String right = "right";
-                String tiltr = "tiltr";
-                String tiltl = "tiltl";
+                String up = "up";
+                String down = "down";
+//                String tiltl = "tiltl";
+//                String tiltr = "tiltr";
                 String idle = "idle";
 
                 if(testData.classAttribute().value((int)pred).equals(left)){
@@ -112,19 +115,9 @@ public class WekaTrain {
                     GestureID = 4;
                     processingGesture = true;
                 }
-                else if(testData.classAttribute().value((int)pred).equals(tiltr)){
-                    System.out.print("Predicted: " + tiltr);
-                    GestureID = 5;
-                    processingGesture = true;
-                }
-                else if(testData.classAttribute().value((int)pred).equals(tiltl)){
-                    System.out.print("Predicted: " + tiltl);
-                    GestureID = 6;
-                    processingGesture = true;
-                }
                 else if(testData.classAttribute().value((int)pred).equals(idle)){
                     System.out.print("Predicted: " + idle);
-                    GestureID = 7;
+                    GestureID = 5;
 //                    processingGesture = false;
                 }
                 else{
@@ -141,20 +134,25 @@ public class WekaTrain {
             System.out.println("Failed to classify:" + ex.getMessage());
         }
         final String messageText = ""+ GestureID;
-        System.out.print("\n" + "input to android: (" + messageText +")");
+//        System.out.print("\n" + "input to android: (" + messageText +")");
         //messagesArea.append("\n" + "input to android: (" + messageText +")");
 
-        if(GestureID != 0 && GestureID != 7){
+        if(GestureID != 0 && GestureID != 5){
 
             LhServer.sendMessage(messageText);
             Timer timer1 = new Timer();
             timer1.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    processingGesture = false;
-                    System.out.print("started timer");
+
+                    if (processingGesture)
+                    {
+                        queue.clear();
+                        processingGesture = false;
+                        System.out.print("Gathering measurements again...!");
+                    }
                 }
-            }, 2000);
+            }, 4000);
         }
 
         return GestureID;
@@ -164,14 +162,13 @@ public class WekaTrain {
     {
         // Create numeric attributes "x" and "y" and "z"
         // Create vector of the above attributes
-        FastVector attributes = new FastVector(3);
+        FastVector attributes = new FastVector(0);
 
         for (int i = 0; i < attributeList.length; i++)
             attributes.addElement(attributeList[i]);
 
         // Create the empty datasets "wekaPoints" with above attributes
         Instances wekaPoints = new Instances(name, attributes, 0);
-
 
         // Create empty instance
         Instance inst = new weka.core.DenseInstance(181);
@@ -215,45 +212,14 @@ public class WekaTrain {
         }
     }
 
-    public void routine(/*Data raw*/) {
-
-        Random rand = new Random();
-
-        if (queue.size() >= n) {
-            queue.remove(0);
-        }
-
-        Data raw = new Data(
-                rand.nextInt(50) + 1,
-                rand.nextInt(50) + 1,
-                rand.nextInt(50) + 1,
-                rand.nextInt(50) + 1,
-                rand.nextInt(50) + 1,
-                rand.nextInt(50) + 1);
-
-        queue.add(raw);
-
-        if (queue.size() < n) {
-            return;
-        }
-
-/*        Data refined = averageQueueData();
-        writeStringToFile(refined.toString());*/
-    }
-
-    public class CustomTask extends TimerTask {
+    public class readFileTask extends TimerTask {
 
 
-        public CustomTask() throws IOException {
+        public readFileTask() throws IOException {
         }
 //        boolean running = true;
         boolean reachedEndOnce = false;
-//        BufferedInputStream reader = new BufferedInputStream(new FileInputStream( "Data/log.csv" ) );
-//        BufferedReader br = new BufferedReader(new FileReader("Data/log.csv"));
         Path path = Paths.get("Data/imu_Lab/log.csv");
-//        InputStream is = Files.newInputStream(path, StandardOpenOption.READ);
-//        InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
-//        BufferedReader lineReader = new BufferedReader(reader);
         final String cvsSplitBy = ",";
         int lineCount = 0;
         int lastCount = 0;
@@ -267,7 +233,7 @@ public class WekaTrain {
 
                 while ((line = lineReader.readLine()) != null) {
 
-                    if (reachedEndOnce && lineCount > lastCount)
+                    if (reachedEndOnce && lineCount > lastCount && !processingGesture)
                     {
                         String[] dataFromFile = line.split(cvsSplitBy);
                         Data d = new Data(
@@ -280,6 +246,12 @@ public class WekaTrain {
 
                         PushQueue(d);
                     }
+
+                    if (processingGesture)
+                    {
+                        queue.clear();
+                    }
+
                     lineCount++;
                 }
 
@@ -293,12 +265,11 @@ public class WekaTrain {
             }
             //System.out.print("called gesture");
             //sendGesture();
-            if (queue.size() == 30 && reachedEndOnce)
+            if (queue.size() >= 30 && reachedEndOnce)
             {
-
-                System.out.print("called gesture");
+                // System.out.print("called gesture");
                 sendGesture();
-                System.out.println( queue.get(queue.size()-1) );
+                // System.out.println( queue.get(queue.size()-1) );
             }
         }
     }
@@ -313,13 +284,11 @@ public class WekaTrain {
 
     public void createInstance(){
 
-        FastVector fvNominalVal = new FastVector(3);
-        fvNominalVal.addElement("up");
-        fvNominalVal.addElement("down");
+        FastVector fvNominalVal = new FastVector(5);
         fvNominalVal.addElement("left");
         fvNominalVal.addElement("right");
-        fvNominalVal.addElement("tiltl");
-        fvNominalVal.addElement("tiltr");
+        fvNominalVal.addElement("up");
+        fvNominalVal.addElement("down");
         fvNominalVal.addElement("idle");
         Attribute Lable = new Attribute("Lable", fvNominalVal);
 
@@ -364,8 +333,6 @@ public class WekaTrain {
             return;
         }
     }
-
-
 
     public void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
         out.printf("Display name: %s\n", netint.getDisplayName());
