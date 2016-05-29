@@ -219,9 +219,9 @@ public class WekaTrain {
 
     public class CustomTask extends TimerTask {
 
+
         public CustomTask() throws IOException {
         }
-
 //        boolean running = true;
         boolean reachedEndOnce = false;
 //        BufferedInputStream reader = new BufferedInputStream(new FileInputStream( "Data/log.csv" ) );
@@ -267,9 +267,11 @@ public class WekaTrain {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+            //System.out.print("called gesture");
+            //sendGesture();
             if (queue.size() == 30 && reachedEndOnce)
             {
+                System.out.print("called gesture");
                 sendGesture();
                 System.out.println( queue.get(queue.size()-1) );
             }
