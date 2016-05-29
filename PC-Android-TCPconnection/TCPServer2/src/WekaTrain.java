@@ -39,7 +39,7 @@ public class WekaTrain {
         try {
             TimerTask timerTask = new CustomTask();
             Timer timer = new Timer(true);
-            timer.scheduleAtFixedRate(timerTask, 0, 250);
+            timer.scheduleAtFixedRate(timerTask, 0, 150);
             System.out.println("TimerTask started");
         }
         catch (Exception e) {
@@ -146,13 +146,13 @@ public class WekaTrain {
 
         if(GestureID != 0 && GestureID != 7){
 
+            LhServer.sendMessage(messageText);
             Timer timer1 = new Timer();
             timer1.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     processingGesture = false;
                     System.out.print("started timer");
-                    LhServer.sendMessage(messageText);
                 }
             }, 2000);
         }
