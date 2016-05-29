@@ -27,8 +27,11 @@ public class WekaTrain {
 
     public WekaTrain() {
         try {
-        // Create empty instance with three attribute values
+            // Create empty instance with three attribute values
             createInstance();
+
+            queue = new ArrayList();
+            n = 30;
 
             // load data
             ArffLoader loader = new ArffLoader();
@@ -38,13 +41,13 @@ public class WekaTrain {
 
             // train NaiveBayes
             NaiveBayesUpdateable nb = new NaiveBayesUpdateable();
-            nb.buildClassifier(structure);
-            Instance current;
-            while ((current = loader.getNextInstance(structure)) != null)
-                nb.updateClassifier(current);
-
-            // output generated model
-            System.out.println(nb);
+//            nb.buildClassifier(structure);
+//            Instance current;
+//            while ((current = loader.getNextInstance(structure)) != null)
+//                nb.updateClassifier(current);
+//
+//             output generated model
+//            System.out.println(nb);
         }
         catch (IOException ex) {
             System.out.println("failed to load arff" + ex.getMessage());
@@ -55,7 +58,7 @@ public class WekaTrain {
         try {
             TimerTask timerTask = new CustomTask();
             Timer timer = new Timer(true);
-            timer.scheduleAtFixedRate(timerTask, 0, 1000);
+            timer.scheduleAtFixedRate(timerTask, 0, 3000);
             System.out.println("TimerTask started");
         }
         catch (Exception e) {
@@ -93,7 +96,7 @@ public class WekaTrain {
             fvClassVal.addElement("down");
             Attribute ClassAttr = new Attribute("Lable",fvClassVal);
             Attribute ClassAttribute = new Attribute("Lable", fvClassVal);*/
-            System.out.println("Filed loaded");
+            System.out.println("File loaded");
             //System.out.println("val:" + val2);
 
 
@@ -116,7 +119,7 @@ public class WekaTrain {
 
     public int sendGesture(){
         int GestureID = 0;
-        try{
+        try {
             BufferedReader breader = null;
             breader = new BufferedReader(new FileReader("Data/combined_train.arff"));
             Instances trainData = new Instances(breader);
@@ -325,8 +328,6 @@ public class WekaTrain {
 
                     while ((line = lineReader.readLine()) != null) {
 
-
-
                         if (reachedEndOnce && lineCount > lastCount)
                         {
                             String[] dataFromFile = line.split(cvsSplitBy);
@@ -427,9 +428,6 @@ String CSVSource = "Data/input.csv";
 
     public void createInstance(){
 
-        queue = new LinkedList();
-        n = 30;
-
         FastVector fvNominalVal = new FastVector(3);
         fvNominalVal.addElement("up");
         fvNominalVal.addElement("down");
@@ -443,7 +441,7 @@ String CSVSource = "Data/input.csv";
         attributeList[0] = Lable;
 
         int index = 1;
-        for(int i = 0; i <= 181;){
+        for(int i = 0; i < 180;){
             attributeList[i+1] = new Attribute("AccX" + (index));
             attributeList[i+2] = new Attribute("AccY" + (index));
             attributeList[i+3] = new Attribute("AccZ" + (index));

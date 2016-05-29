@@ -48,10 +48,10 @@ public class ServerBoard extends JFrame {
         panelFields2.setLayout(new BoxLayout(panelFields2, BoxLayout.X_AXIS));
 
         wekatrain = new WekaTrain();
-        wekatrain.LoadTrainset();
-        readfile FR = new readfile();
-        FR.readfile();
-        wekatrain.sendGesture();
+//        wekatrain.LoadTrainset();
+//        readfile FR = new readfile();
+//        FR.readfile();
+//        wekatrain.sendGesture();
 
 
         //here we will have the text messages screen
