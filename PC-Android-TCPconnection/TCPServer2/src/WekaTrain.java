@@ -33,14 +33,14 @@ public class WekaTrain {
         listNets();
 
         queue = new ArrayList();
-        n = 30;
+        n = 100;
 
         createInstance();
 
         try {
             TimerTask timerTask = new readFileTask();
             Timer timer = new Timer(true);
-            timer.scheduleAtFixedRate(timerTask, 0, 100);
+            timer.scheduleAtFixedRate(timerTask, 0, 250);
             System.out.println("TimerTask started");
         }
         catch (Exception e) {
