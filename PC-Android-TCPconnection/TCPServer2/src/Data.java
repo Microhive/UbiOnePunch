@@ -11,8 +11,11 @@ public class Data {
     public double GyrX = 0;
     public double GyrY = 0;
     public double GyrZ = 0;
+    
+    public String line;
 
-    public Data(double AccX, double AccY, double AccZ, double GyrX, double GyrY, double GyrZ) {
+    public Data(String line, double AccX, double AccY, double AccZ, double GyrX, double GyrY, double GyrZ) {
+        this.line = line;
         this.AccX = AccX;
         this.AccY = AccY;
         this.AccZ = AccZ;

@@ -40,7 +40,7 @@ public class WekaTrain {
         try {
             TimerTask timerTask = new readFileTask();
             Timer timer = new Timer(true);
-            timer.scheduleAtFixedRate(timerTask, 0, 250);
+            timer.scheduleAtFixedRate(timerTask, 0, 500);
             System.out.println("TimerTask started");
         }
         catch (Exception e) {
@@ -237,6 +237,7 @@ public class WekaTrain {
                     {
                         String[] dataFromFile = line.split(cvsSplitBy);
                         Data d = new Data(
+                                dataFromFile[0],
                                 Double.parseDouble(dataFromFile[1]),
                                 Double.parseDouble(dataFromFile[2]),
                                 Double.parseDouble(dataFromFile[3]),
@@ -245,6 +246,11 @@ public class WekaTrain {
                                 Double.parseDouble(dataFromFile[6]));
 
                         PushQueue(d);
+
+                        if (queue.size() >= 30 && reachedEndOnce && !processingGesture && (lineCount+60) > lastCount)
+                        {
+                            sendGesture();
+                        }
                     }
 
                     if (processingGesture)
@@ -255,7 +261,7 @@ public class WekaTrain {
                     lineCount++;
                 }
 
-                lastCount = lineCount;
+                lastCount = lineCount - 1;
                 lineCount = 0;
 
                 reachedEndOnce = true;
@@ -265,12 +271,12 @@ public class WekaTrain {
             }
             //System.out.print("called gesture");
             //sendGesture();
-            if (queue.size() >= 30 && reachedEndOnce)
-            {
-                // System.out.print("called gesture");
-                sendGesture();
-                // System.out.println( queue.get(queue.size()-1) );
-            }
+//            if (queue.size() >= 30 && reachedEndOnce)
+//            {
+//                // System.out.print("called gesture");
+//                sendGesture();
+//                // System.out.println( queue.get(queue.size()-1) );
+//            }
         }
     }
 

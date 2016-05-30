@@ -188,8 +188,8 @@ public void Connect(){
                     String t3 = "3";
                     String t4 = "4";
                     String t5 = "5";
-                    String t6 = "6";
-                    String t7 = "7";
+//                    String t6 = "6";
+//                    String t7 = "7";
 
 
                     if(t1.equals(message)){
@@ -211,33 +211,33 @@ public void Connect(){
                         commands = "gesture 3";
                         publishProgress("Called: "+ commands);
 
-                        swipeGestureInfo("swiped up",3);
+                        swipeGestureInfo("zoomed in",3);
 
                     }
                     else if(t4.equals(message)){
                         commands = "gesture 4";
                         publishProgress("Called: "+ commands);
-                        swipeGestureInfo("swiped down",4);
+                        swipeGestureInfo("zoomed out",4);
 
                     }
                     else if(t5.equals(message)){
                         commands = "gesture 5";
                         publishProgress("Called: " + commands);
 
-                        swipeGestureInfo("zoomed in",5);
+                        swipeGestureInfo("idle",5);
 
                     }
-                    else if(t6.equals(message)){
-                        commands = "gesture 6";
-                        publishProgress("Called: "+ commands);
-                        swipeGestureInfo("zoomed out",6);
-
-                    }
-                    else if (t7.equals(message)){
-                        commands = "gesture 7";
-                        publishProgress("Called: "+ commands + "(idle state)");
-                        swipeGestureInfo("idle",7);
-                    }
+//                    else if(t6.equals(message)){
+//                        commands = "gesture 6";
+//                        publishProgress("Called: "+ commands);
+//                        swipeGestureInfo("zoomed out",6);
+//
+//                    }
+//                    else if (t5.equals(message)){
+//                        commands = "gesture 5";
+//                        publishProgress("Called: "+ commands + "(idle state)");
+//                        swipeGestureInfo("idle",7);
+//                    }
                     else{
                         publishProgress("Wrong input: " + message);
                         swipeGestureInfo("wrong input",7);
@@ -271,24 +271,24 @@ public void swipeGestureInfo(final String GestureMsg, final int animtype){
             }
             else if (animtype == 3) {
                 ImageView image = (ImageView) findViewById(R.id.imageView);
-                Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.swipeup);
+                Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.zoomin);
                 image.startAnimation(animation);
             }
             else if (animtype == 4) {
                 ImageView image = (ImageView) findViewById(R.id.imageView);
-                Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.swipedown);
-                image.startAnimation(animation);
-            }
-            else if (animtype == 5) {
-                ImageView image = (ImageView) findViewById(R.id.imageView);
-                Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.zoomin);
-                image.startAnimation(animation);
-            }
-            else if (animtype == 6) {
-                ImageView image = (ImageView) findViewById(R.id.imageView);
                 Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.zoomout);
                 image.startAnimation(animation);
             }
+//            else if (animtype == 5) {
+//                ImageView image = (ImageView) findViewById(R.id.imageView);
+//                Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.zoomin);
+//                image.startAnimation(animation);
+//            }
+//            else if (animtype == 6) {
+//                ImageView image = (ImageView) findViewById(R.id.imageView);
+//                Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.zoomout);
+//                image.startAnimation(animation);
+//            }
             else{
                 return;
             }
